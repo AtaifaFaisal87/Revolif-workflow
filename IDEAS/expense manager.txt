@@ -1,0 +1,354 @@
+================ EXPENSE MANAGER WORKING ================
+
+
+User inputs his financial data:
+
+|
+├── When user receives money
+|       |
+|       └── Add Income
+|
+├── When user spends money
+|       |
+|       └── Add Expense
+|
+|
+ExpenseManager
+|
+├── Generates automatic Transaction ID
+|
+├── Stores all income and expense records
+|
+├── Calculates current balance
+|
+├── Provides financial data to Statistics
+|
+|
+Statistics Module
+|
+├── Reads ExpenseManager data
+|
+├── Generates weekly/monthly/yearly reports
+|
+└── Shows spending patterns and financial analysis
+
+
+
+================ EXPENSE MANAGER ================
+
+
+Data:
+
+|
+└── vector<Transaction*> transactions
+
+
+
+getTransactionByID()
+
+
+
+CREATE
+
+|
+├── addIncome()
+└── addExpense()
+
+
+
+READ
+
+|
+├── displayAllTransactions()
+├── displayIncome()
+├── displayExpenses()
+├── displayRecentTransactions()
+└── displayCurrentBalance()
+
+
+
+SEARCH
+
+|
+├── searchByID()
+├── searchByCategory()
+├── searchByDate()
+├── searchByType()
+└── searchByAmount()
+
+
+
+UPDATE
+
+|
+└── updateTransaction()
+
+
+
+DELETE
+
+|
+└── removeTransactionByID()
+
+
+
+================ BASE CLASS ================
+
+
+Transaction Class
+
+
+Attributes:
+
+Transaction ID (Auto-generated)
+
+Transaction Type
+
+Amount
+
+Category
+
+Description
+
+Transaction Date
+
+
+
+Functions:
+
+
+Constructor
+
+Transaction()
+
+Generate automatic ID
+
+
+
+Setters
+
+setAmount()
+
+setType()
+
+setCategory()
+
+setDescription()
+
+setDate()
+
+
+
+Getters
+
+getTransactionID()
+
+getAmount()
+
+getType()
+
+getCategory()
+
+getDescription()
+
+getDate()
+
+
+
+Transaction Operations
+
+displayTransaction()
+
+
+
+================ ENUMS ================
+
+
+Transaction Type:
+
+INCOME
+
+EXPENSE
+
+
+
+Expense Category:
+
+FOOD
+
+TRANSPORT
+
+EDUCATION
+
+ENTERTAINMENT
+
+SHOPPING
+
+HEALTH
+
+BILLS
+
+OTHER
+
+
+
+================ EXPENSE MANAGER FUNCTIONS ================
+
+
+Financial Calculations:
+
+
+calculateTotalIncome()
+
+calculateTotalExpense()
+
+getBalance()
+
+
+
+Working:
+
+
+Income Example:
+
+User receives pocket money
+
+↓
+
+User enters amount
+
+↓
+
+ExpenseManager creates Income Transaction
+
+↓
+
+Stores inside vector<Transaction*>
+
+
+
+Expense Example:
+
+User buys something
+
+↓
+
+User enters expense details
+
+↓
+
+ExpenseManager creates Expense Transaction
+
+↓
+
+Stores inside vector<Transaction*>
+
+
+
+Balance:
+
+
+Total Balance = Total Income - Total Expenses
+
+
+
+================ USER AND EXPENSE MANAGER RELATIONSHIP ================
+
+
+The User has a composition relationship with ExpenseManager because financial data belongs to a specific user.
+
+Each User contains their own ExpenseManager object, which manages all income and expense transactions of that user.
+
+When a User exists, their ExpenseManager exists with them.
+
+Each transaction is linked to that specific user's ID.
+
+User financial data remains private and isolated from other users.
+
+
+
+================ EXPENSE MANAGER AND STATISTICS RELATIONSHIP ================
+
+
+Statistics has an association relationship with ExpenseManager.
+
+Statistics does not store financial data.
+
+It only reads ExpenseManager data and generates reports.
+
+
+Example:
+
+
+ExpenseManager
+
+        |
+
+        ↓
+
+Statistics
+
+
+Monthly Report:
+
+Total Income
+
+Total Expenses
+
+Remaining Balance
+
+Highest Spending Category
+
+Category-wise Expenses
+
+
+
+================ FINAL ARCHITECTURE ================
+
+
+                    User
+
+                      |
+
+        --------------------------------
+
+        |                              |
+
+ ExpenseManager                 Statistics
+
+        |
+
+        |
+
+vector<Transaction*>
+
+        |
+
+        |
+
+ -----------------
+
+ |               |
+
+Income        Expense
+
+
+
+================ DESIGN REASONING ================
+
+
+Transaction class represents one financial activity.
+
+ExpenseManager manages all transactions of one user.
+
+Statistics analyzes financial data but does not modify it.
+
+Using one Transaction class avoids unnecessary inheritance because Income and Expense share the same attributes.
+
+The design supports future features like:
+
+- Budget Management
+- Saving Goals
+- AI Financial Advice
+- Spending Predictions
+- Monthly Financial Health Score

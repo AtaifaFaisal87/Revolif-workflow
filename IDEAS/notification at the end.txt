@@ -1,0 +1,575 @@
+================ NOTIFICATION SYSTEM WORKING ================
+
+
+User performs actions in different modules
+
+
+|
+
+|
+
+├── TaskManager
+
+|       |
+|       └── Upcoming task deadline
+
+|
+
+├── GoalManager
+
+|       |
+|       ├── Goal reached 90% progress
+|       └── Goal completed
+
+|
+
+├── AchievementManager
+
+|       |
+|       └── New badge unlocked
+
+|
+
+├── ExpenseManager
+
+|       |
+|       └── Budget limit exceeded
+
+|
+
+└── HealthManager
+
+        |
+        └── Health reminder
+
+
+
+All events are sent to:
+
+
+NotificationManager
+
+
+|
+
+├── Creates notification
+
+├── Stores notification
+
+├── Displays notifications after login
+
+└── Sends email notifications when required
+
+
+
+==================================================
+
+
+================ NOTIFICATION MANAGER ================
+
+
+Data:
+
+
+|
+
+└── vector<Notification*> notifications
+
+
+
+getNotificationByID()
+
+
+
+CREATE
+
+
+|
+
+└── addNotification()
+
+
+
+READ
+
+
+|
+
+├── displayAllNotifications()
+
+├── displayUnreadNotifications()
+
+├── displayRecentNotifications()
+
+└── displayNotificationsByType()
+
+
+
+SEARCH
+
+
+|
+
+├── searchByID()
+
+├── searchByDate()
+
+└── searchByType()
+
+
+
+UPDATE
+
+
+|
+
+├── markAsRead()
+
+└── clearNotification()
+
+
+
+DELETE
+
+
+|
+
+└── removeNotificationByID()
+
+
+
+==================================================
+
+
+================ NOTIFICATION CLASS ================
+
+
+Attributes:
+
+
+Notification ID (Auto-generated)
+
+Title
+
+Message
+
+Notification Type
+
+Date Created
+
+Priority Level
+
+Read Status
+
+
+
+==================================================
+
+
+Functions:
+
+
+Constructor:
+
+
+Notification()
+
+Generate automatic ID
+
+
+
+Setters:
+
+
+setTitle()
+
+setMessage()
+
+setType()
+
+setDate()
+
+setPriority()
+
+setStatus()
+
+
+
+Getters:
+
+
+getNotificationID()
+
+getTitle()
+
+getMessage()
+
+getType()
+
+getDate()
+
+getPriority()
+
+getStatus()
+
+
+
+Operations:
+
+
+markAsRead()
+
+displayNotification()
+
+
+
+==================================================
+
+
+================ NOTIFICATION TYPES ================
+
+
+enum NotificationType
+
+
+{
+
+
+TASK_DEADLINE,
+
+
+GOAL_PROGRESS,
+
+
+GOAL_COMPLETED,
+
+
+ACHIEVEMENT_UNLOCKED,
+
+
+EXPENSE_ALERT,
+
+
+HEALTH_REMINDER
+
+
+}
+
+
+
+==================================================
+
+
+================ NOTIFICATION EXAMPLES ================
+
+
+
+Task Deadline:
+
+
+"Assignment submission deadline is tomorrow"
+
+
+
+Goal Progress:
+
+
+"Congratulations! Your goal 'Learn DSA' has reached 90% progress"
+
+
+
+Goal Completed:
+
+
+"Your goal 'Complete Project' has been completed"
+
+
+
+Achievement:
+
+
+"New Badge Unlocked: Goal Master"
+
+
+
+Expense Alert:
+
+
+"You have exceeded your monthly budget"
+
+
+
+Health Reminder:
+
+
+"Time for your medicine reminder"
+
+
+
+==================================================
+
+
+================ USER AND NOTIFICATION RELATIONSHIP ================
+
+
+The User has a composition relationship with NotificationManager because notifications belong to a specific user.
+
+
+Each User contains their own NotificationManager object.
+
+
+Example:
+
+
+User A
+
+
+|
+
+NotificationManager
+
+
+|
+
+Notifications:
+
+- Task deadline reminder
+
+- Goal achievement
+
+- Badge unlocked
+
+
+
+User B has separate notifications.
+
+
+
+==================================================
+
+
+================ MODULE RELATIONSHIP ================
+
+
+NotificationManager has association relationships with:
+
+
+TaskManager
+
+GoalManager
+
+AchievementManager
+
+ExpenseManager
+
+HealthManager
+
+
+
+Working:
+
+
+TaskManager
+
+        |
+
+        ↓
+
+NotificationManager
+
+
+
+GoalManager
+
+        |
+
+        ↓
+
+NotificationManager
+
+
+
+AchievementManager
+
+        |
+
+        ↓
+
+NotificationManager
+
+
+
+==================================================
+
+
+================ EMAIL NOTIFICATION SYSTEM ================
+
+
+NotificationManager is connected with EmailService.
+
+
+Working:
+
+
+Important Event Occurs
+
+|
+
+↓
+
+Notification Created
+
+|
+
+↓
+
+NotificationManager checks priority
+
+|
+
+↓
+
+EmailService sends email
+
+|
+
+↓
+
+User receives notification
+
+
+
+Example:
+
+
+Goal Completed:
+
+
+Application:
+
+"Congratulations! You completed your goal"
+
+
+
+Email:
+
+
+Subject:
+
+Goal Completed
+
+
+Message:
+
+Your goal "Learn C++" has been completed successfully.
+
+
+
+==================================================
+
+
+================ LOGIN NOTIFICATION FLOW ================
+
+
+User Login
+
+
+|
+
+↓
+
+System loads user notifications
+
+
+|
+
+↓
+
+NotificationManager checks unread notifications
+
+
+|
+
+↓
+
+Displays notifications at top of dashboard
+
+
+Example:
+
+
+
+================ NOTIFICATIONS ================
+
+
+🔔 Assignment deadline tomorrow
+
+
+🏆 New badge unlocked: Goal Master
+
+
+🎯 Goal progress reached 90%
+
+
+💰 Monthly budget exceeded
+
+
+
+==================================================
+
+
+================ FINAL ARCHITECTURE ================
+
+
+
+                         User
+
+                           |
+
+                  NotificationManager
+
+                           |
+
+                  vector<Notification*>
+
+
+                           |
+
+
+ ----------------------------------------------------
+
+ |          |             |            |             |
+
+Task    Goal       Achievement    Expense      Health
+
+Manager Manager    Manager       Manager     Manager
+
+
+
+                           |
+
+                      EmailService
+
+
+
+==================================================
+
+
+================ DESIGN REASONING ================
+
+
+NotificationManager centralizes all alerts from different modules.
+
+Individual managers only generate events and do not handle notifications.
+
+Notification class represents one alert.
+
+EmailService handles sending emails separately.
+
+This design keeps modules independent and allows future additions like:
+
+- Push notifications
+- Mobile app alerts
+- Smart AI reminders
+- Custom notification settings
+- Notification history

@@ -1,0 +1,105 @@
+# Life Manager
+
+A console-based personal life management system written in C++, combining **task management**, **expense tracking**, and **goal setting** into a single OOP-driven application.
+
+## Overview
+
+Life Manager lets each registered user manage three areas of their life from one account:
+
+- **Tasks** — Academic and Daily tasks with descriptions, deadlines (date + time), categories, and status
+- **Expenses** — Titled, categorized spending records with amounts, dates, and descriptions
+- **Goals** — Personal goals with categories, deadlines, and a title/badge system that rewards consistent progress
+
+The application is built around a small class hierarchy (polymorphic tasks, composed managers, and a `User` that owns them all) and runs entirely in the terminal — no external database or file storage is used.
+
+## Features
+
+### Accounts
+- Registration with Full Name, unique Username, Date of Birth, and Password (with confirmation)
+- Login via Username + Password
+- Change password from within the app
+- Profile view/update
+
+### Task Manager
+- Two task types: **Academic** (Exam, Assignment, Project, Midterm, Test, Submission, Viva, Presentation, Other) and **Daily** (Laundry, Cleaning, Exercise, Grocery Shopping, Cooking, Reading, Other)
+- Each task stores a title, description, category, deadline **date and time**, and status
+- Display all / completed / pending tasks (numbered lists)
+- Search by ID, title, category, deadline, or status (title/category/status search is case-insensitive and partial-match)
+- Mark complete, update, or delete — each shows the current task list first so you never need to remember an ID
+
+### Expense Manager
+- Category-first entry so titles describe the actual purchase (e.g. Category: `Food`, Title: `KFC Dinner`)
+- Categories: Food, Transport, Education, Shopping, Bills, Entertainment, Health, Other
+- Search by ID, title, category, or date
+- Update any single field (title, amount, category, date, description) without retyping the rest
+- Running total and highest-spending category shown on the dashboard
+
+### Goal Manager
+- Categories: Academic, Career, Health, Personal Development, Financial, Other
+- Deadline tracking with automatic "Overdue" status once the deadline passes
+- Title/badge system — unlocks a new title at 5, 10, 20, 30, 40, and 50 completed goals
+- Search, update, complete, and delete follow the same guided flow as tasks
+
+### Dashboard
+Shown immediately after login:
+- Pending, overdue, due-soon, and completed task counts
+- Pending, overdue, and completed goal counts, plus progress toward the next title
+- Total spent and highest-spending category
+- Most recently earned title (if any)
+- Full pending task list
+
+## Design Principles
+
+Every manager (Task, Expense, Goal) follows the same interaction pattern:
+
+```
+Display records → Select ID → Perform action → Confirmation message → Return to menu
+```
+
+- **Update** — shows all records, asks for an ID, then asks *which single field* to change
+- **Delete** — shows all records, asks for an ID, then requires a Yes/No confirmation
+- **Complete** — shows pending/incomplete records, asks for an ID, then marks it done
+- **Search** — case-insensitive and substring-based across title, category, and status fields
+
+## Architecture
+
+```
+Date, Time              Value classes for calendar dates and clock times
+Task (abstract)         ├── AcademicTask
+                         └── DailyTask
+TaskManager              Owns a vector<Task*>; polymorphic dispatch via displayTask()
+Expense / ExpenseManager Owns a vector<Expense*>
+Goal / GoalManager       Owns a vector<Goal*>; tracks completed-goal badges/titles
+User                      Composes TaskManager + ExpenseManager + GoalManager
+Authentication            Verifies login and handles password changes (friend of User)
+```
+
+Coding conventions used throughout:
+- No exception handling — invalid input is caught and re-prompted directly
+- No file I/O — all data lives in memory for the session
+- Auto-incrementing static IDs for tasks, expenses, goals, and users
+- `ALL CAPS` prompts and messages
+- `vector<T*>` for all collections, with manual `delete` in each manager's destructor
+
+## Building
+
+Requires a C++17-capable compiler (uses `<ctime>`, `<algorithm>`, `<cctype>`, `<utility>`).
+
+```bash
+g++ -std=c++17 -o LifeManager LM7.cpp
+./LifeManager
+```
+
+## Usage
+
+1. Run the program and choose **Register** to create an account (Full Name, Username, DOB, Password).
+2. Choose **Login** with your Username and Password.
+3. From the dashboard, open the **User Menu** to reach the Task, Expense, or Goal Manager.
+4. Add records, then use **Display / Search / Update / Delete / Complete** as needed — every destructive or ID-based action shows you the current list first.
+5. **Logout** returns to the Register/Login screen; **Exit** closes the program.
+
+## Notes
+
+- All data is in-memory only; nothing is saved once the program exits.
+- Usernames must be unique across all registered accounts; the app checks this at registration time.
+- This is an academic OOP project (CS-116, Computer Systems Engineering) — the architecture intentionally favors clarity of design (inheritance, polymorphism, composition) over persistence or production-grade error handling.

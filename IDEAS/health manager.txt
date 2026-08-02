@@ -1,0 +1,423 @@
+================ HEALTH MANAGER WORKING ================
+
+
+User experiences a health issue
+
+|
+
+├── User inputs symptoms
+|
+├── HealthManager creates Health Record
+|
+├── Stores health information
+|
+├── User can view previous health records
+|
+|
+AI Assistant
+
+|
+
+├── Reads symptom information
+|
+├── Analyzes symptoms
+|
+├── Provides possible causes and suggestions
+|
+└── Recommends actions
+
+
+Statistics Module
+
+|
+
+├── Reads HealthManager data
+|
+└── Generates health reports and patterns
+
+
+
+================ HEALTH MANAGER ================
+
+
+Data:
+
+|
+└── vector<HealthRecord*> healthRecords
+
+
+
+getHealthRecordByID()
+
+
+
+CREATE
+
+|
+└── addHealthRecord()
+
+
+
+READ
+
+|
+├── displayAllRecords()
+├── displayRecentRecords()
+├── displaySymptoms()
+├── displayMedicalHistory()
+└── displayHealthStatus()
+
+
+
+SEARCH
+
+|
+├── searchByID()
+├── searchBySymptom()
+├── searchByDate()
+└── searchBySeverity()
+
+
+
+UPDATE
+
+|
+├── updateHealthRecord()
+└── updateSymptoms()
+
+
+
+DELETE
+
+|
+└── removeHealthRecordByID()
+
+
+
+================ BASE CLASS ================
+
+
+HealthRecord Class
+
+
+
+Attributes:
+
+
+Health Record ID (Auto-generated)
+
+Symptoms
+
+Description
+
+Severity Level
+
+Date Reported
+
+Health Status
+
+Notes
+
+
+
+Functions:
+
+
+Constructor
+
+HealthRecord()
+
+Generate automatic ID
+
+
+
+Setters:
+
+
+setSymptoms()
+
+setDescription()
+
+setSeverity()
+
+setDate()
+
+setStatus()
+
+setNotes()
+
+
+
+Getters:
+
+
+getHealthRecordID()
+
+getSymptoms()
+
+getDescription()
+
+getSeverity()
+
+getDate()
+
+getStatus()
+
+getNotes()
+
+
+
+Health Operations:
+
+
+markResolved()
+
+updateStatus()
+
+
+
+Display:
+
+
+displayHealthRecord()
+
+
+
+================ ENUMS ================
+
+
+Severity Level:
+
+
+LOW
+
+MEDIUM
+
+HIGH
+
+CRITICAL
+
+
+
+Health Status:
+
+
+ONGOING
+
+IMPROVED
+
+RESOLVED
+
+
+
+================ HEALTH RECORD WORKING ================
+
+
+Example:
+
+
+User Input:
+
+
+Symptoms:
+
+Headache, fever
+
+
+Description:
+
+Feeling sick since morning
+
+
+Severity:
+
+Medium
+
+
+
+Flow:
+
+
+User Input
+
+↓
+
+HealthManager
+
+↓
+
+Creates HealthRecord Object
+
+↓
+
+Stores inside vector<HealthRecord*>
+
+
+
+================ AI ASSISTANT RELATIONSHIP ================
+
+
+AI Assistant has an association relationship with HealthManager.
+
+AI Assistant does not store health data.
+
+It only reads health records when the user requests help.
+
+
+
+Working:
+
+
+User
+
+↓
+
+HealthManager
+
+↓
+
+AI Assistant
+
+↓
+
+Symptom Analysis
+
+↓
+
+Suggestions / Recommendations
+
+
+
+Example:
+
+
+Input:
+
+
+Symptoms:
+
+Cough + Fever + Fatigue
+
+
+
+AI Response:
+
+
+Possible causes:
+
+- Common cold
+- Flu
+
+
+Suggestions:
+
+- Rest
+- Stay hydrated
+- Monitor symptoms
+
+- Consult doctor if symptoms become severe
+
+
+
+================ USER AND HEALTH MANAGER RELATIONSHIP ================
+
+
+The User has a composition relationship with HealthManager because health records belong to a specific user.
+
+Each User contains their own HealthManager object, which manages all personal health records.
+
+When a User exists, their HealthManager exists with them.
+
+Each HealthRecord is linked to that user's ID.
+
+Health data remains private and cannot be accessed by other users or unauthorized admins.
+
+
+
+================ HEALTH MANAGER AND STATISTICS RELATIONSHIP ================
+
+
+Statistics has an association relationship with HealthManager.
+
+Statistics does not store health data.
+
+It only reads HealthManager data and generates reports.
+
+
+
+Example:
+
+
+Monthly Health Report:
+
+
+Common Symptoms:
+
+Headache: 4 times
+
+Fever: 2 times
+
+
+Health Trend:
+
+Improving
+
+
+Most Frequent Issue:
+
+Sleep Problems
+
+
+
+================ FINAL ARCHITECTURE ================
+
+
+                         User
+
+                           |
+
+        --------------------------------
+
+        |                              |
+
+ HealthManager                   AI Assistant
+
+        |                              |
+
+        |                              |
+
+vector<HealthRecord*>          Symptom Analysis
+
+
+                 |
+
+                 |
+
+            Statistics
+
+
+
+================ DESIGN REASONING ================
+
+
+HealthRecord represents one health event entered by the user.
+
+HealthManager manages all health records of one user.
+
+AI Assistant analyzes symptoms and provides suggestions but does not modify health data.
+
+Statistics analyzes health history and generates health reports.
+
+Composition keeps each user's medical information private.
+
+
+Future Extensions:
+
+- Medicine Reminder
+- Doctor Appointment Tracking
+- Exercise Tracking
+- Water Intake Tracking
+- Sleep Tracking
+- Health Habits
+- AI Health Assistant Improvement
+- Health Reports

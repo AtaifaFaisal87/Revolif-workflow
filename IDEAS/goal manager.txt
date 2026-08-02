@@ -1,0 +1,262 @@
+GOAL MANAGER - WORKING
+User
+│
+├── Creates Goal
+│
+├── GoalManager generates Goal ID automatically
+│
+├── Goal is stored in vector<Goal*>
+│
+├── User can view, search, update or delete goals
+│
+├── User updates goal progress
+│
+├── If progress reaches 100%
+│      │
+│      ├── Goal Status = Completed
+│      ├── Completion Date is recorded
+│      └── AchievementManager is notified
+│
+├── AchievementManager checks achievement rules
+│
+├── If conditions are satisfied
+│      │
+│      └── Unlock Achievement Badge
+│
+└── Statistics Module reads GoalManager and AchievementManager
+       to generate monthly/yearly reports.
+
+
+GoalManager
+Data
+|
+└── vector<Goal*> goals
+getGoalByID()
+CREATE
+|
+└── addGoal()
+READ
+|
+├── displayAllGoals()
+├── displayCompletedGoals()
+├── displayPendingGoals()
+├── displayExpiredGoals()
+├── displayDeadlineGoals()
+└── displayLifetimeGoals()
+SEARCH
+|
+├── searchByID()
+├── searchByTitle()
+├── searchByCategory()
+├── searchByStatus()
+├── searchByDeadline()
+└── searchByType()
+UPDATE
+|
+├── updateGoal()
+├── updateProgress()
+├── completeGoal()
+└── undoCompletion()
+DELETE
+|
+├── removeGoalByID()
+└── removeGoalByTitle()
+
+
+================= BASE CLASS =================
+Goal Class
+
+Attributes
+Goal ID (Auto-generated)
+
+Goal Title
+
+Description
+
+Category
+
+Goal Type
+
+Status
+
+Progress (%)
+
+Created Date
+
+Completion Date
+
+Deadline (Date object)
+
+Functions
+
+Constructor
+Goal()
+
+Generate Automatic ID
+
+Setters
+setGoalTitle()
+
+setDescription()
+
+setCategory()
+
+setGoalType()
+
+setStatus()
+
+setProgress()
+
+setCreatedDate()
+
+setDeadline()
+
+Getters
+getGoalID()
+
+getGoalTitle()
+
+getDescription()
+
+getCategory()
+
+getGoalType()
+
+getStatus()
+
+getProgress()
+
+getCreatedDate()
+
+getDeadline()
+
+getCompletionDate()
+
+Goal Operations
+updateProgress()
+
+markCompleted()
+
+markPending()
+
+isExpired()
+
+Display
+displayGoal()
+
+================= ACHIEVEMENT =================
+Achievement Class
+Attributes
+Achievement ID (Auto-generated)
+
+Achievement Name
+
+Description
+
+Badge
+
+Unlocked Date
+Functions
+Constructor
+Achievement()
+
+Generate Automatic ID
+Setters
+setAchievementName()
+
+setDescription()
+
+setBadge()
+
+setUnlockedDate()
+Getters
+getAchievementID()
+
+getAchievementName()
+
+getDescription()
+
+getBadge()
+
+getUnlockedDate()
+Display
+displayAchievement()
+AchievementManager
+Data
+|
+└── vector<Achievement> achievements
+READ
+|
+├── displayAllAchievements()
+├── displayRecentAchievements()
+└── displayAchievementsByCategory()
+SEARCH
+|
+├── searchAchievementByID()
+└── searchAchievementByName()
+OPERATIONS
+|
+├── checkAchievements()
+├── unlockAchievement()
+├── hasAchievement()
+
+
+
+GOAL CATEGORIES
+Academic
+
+Health
+
+Fitness
+
+Career
+
+Financial
+
+Personal
+
+Hobby
+
+Other
+
+GOAL TYPES
+Deadline Goal
+
+Lifetime Goal
+
+GOAL STATUS
+Pending
+
+In Progress
+
+Completed
+
+Expired
+
+ACHIEVEMENT EXAMPLES
+🌱 First Goal Completed
+
+🏅 5 Goals Completed
+
+🥇 10 Goals Completed
+
+🏆 Goal Master
+
+🎓 Academic Champion
+
+💪 Fitness Champion
+
+💰 Financial Expert
+
+🔥 Consistency Badge
+
+
+USER, GOAL MANAGER AND ACHIEVEMENT MANAGER
+
+The User has a composition relationship with both GoalManager and AchievementManager because goals and achievements are personal data belonging exclusively to that user.
+
+Each User owns their own GoalManager, which stores and manages all of their goals, and their own AchievementManager, which stores all badges they have earned.
+
+When a User completes a goal, the GoalManager updates the goal's status and notifies the AchievementManager. The AchievementManager evaluates predefined achievement rules and unlocks any earned badges.
+
+Statistics can generate reports based on the user's goals and achievements, while administrators cannot access or modify users' personal goals or achievements, ensuring privacy and security. Each user's data remains isolated and linked only to that specific user account.

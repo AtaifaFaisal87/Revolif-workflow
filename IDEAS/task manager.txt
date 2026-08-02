@@ -1,0 +1,148 @@
+TaskManager
+
+Data:
+|
+└── vector<Task*> tasks
+
+
+getTaskByID()  
+
+CREATE
+|
+└── addTask()
+
+
+READ
+|
+├── displayAllTasks()
+├── displayAcademicTasks()
+├── displayDailyTasks()
+├── displayCompletedTasks()
+└── displayPendingTasks()
+
+
+SEARCH
+|
+├── searchByID()
+├── searchByName()
+├── searchByDeadline()
+├── searchByPriority()
+├── searchByStatus()
+└── searchByType()
+
+
+UPDATE
+|
+├── updateTask()
+├── completeTask()
+└── undoCompletion()
+
+
+DELETE
+|
+├── removeTaskByID()
+└── removeTaskByName()
+
+============== BASE CLASS===========
+
+Task Class
+Attributes:
+Task ID (auto-generated)
+Task Name
+Description
+Priority
+Completion Status
+Created Date
+Deadline (Date object)
+
+Functions:
+
+Constructor
+
+Create task
+Generate automatic ID
+
+Setters
+
+setTaskName()
+setDescription()
+setPriority()
+setStatus()
+setCreatedDate()
+
+Getters
+
+getTaskID()
+getTaskName()
+getDescription()
+getPriority()
+getStatus()
+getCreatedDate()
+
+Task Operations
+
+markCompleted()
+markPending()
+
+Display
+
+displayTask()
+
+=================CHILD CLASS=================
+
+AcademicTask
+
+Inherited:
+- Task ID
+- Task Name
+- Description
+- Priority
+- Status
+- Created Date
+
+Own:
+- Subject
+- Deadline
+- Task Type
+
+
+Functions:
+- Constructor
+- Setters
+- Getters
+- Update academic details
+- Display academic task
+
+
+DailyTask
+
+Inherited:
+- Task ID
+- Task Name
+- Description
+- Priority
+- Status
+- Created Date
+
+
+Own:
+- Time
+- Frequency
+- Reminder
+
+
+Functions:
+- Constructor
+- Setters
+- Getters
+- Update routine details
+- Display daily task
+
+
+USER AND TASK MANAGER
+The User has a composition relationship with TaskManager because tasks are personal data that belong to a specific user.
+Each User contains their own TaskManager, which manages their Academic and Daily Tasks.
+When a User exists, their TaskManager and tasks exist with them, and the tasks are linked to that user's ID.
+
+
+we can sh0w stats for tasks for indiviual users and system and admin can not access user personal task securityyyy

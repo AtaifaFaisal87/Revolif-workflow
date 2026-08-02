@@ -1,0 +1,445 @@
+================ FINAL USER MENU ================
+
+
+User Login
+
+|
+
+User Dashboard
+
+
+1. Task Manager
+
+2. Goal Manager
+
+3. Expense Manager
+
+4. Health Manager
+
+5. Achievement System
+
+6. Statistics / Reports
+
+7. Profile Management
+
+8. Logout
+
+
+
+==================================================
+
+
+================ TASK MANAGER MENU ================
+
+
+1. Add Task
+
+2. View All Tasks
+
+3. View Academic Tasks
+
+4. View Daily Tasks
+
+5. View Completed Tasks
+
+6. View Pending Tasks
+
+7. Search Task
+
+8. Update Task
+
+9. Mark Task Completed
+
+10. Undo Completion
+
+11. Delete Task
+
+12. Task Statistics
+
+13. Back
+
+
+
+==================================================
+
+
+================ GOAL MANAGER MENU ================
+
+
+1. Add Goal
+
+2. View All Goals
+
+3. View Completed Goals
+
+4. View Pending Goals
+
+5. View Deadline Goals
+
+6. View Lifetime Goals
+
+7. Search Goal
+
+8. Update Goal
+
+9. Update Progress
+
+10. Complete Goal
+
+11. Delete Goal
+
+12. Goal Statistics
+
+13. Back
+
+
+
+==================================================
+
+
+================ EXPENSE MANAGER MENU ================
+
+
+1. Add Income
+
+2. Add Expense
+
+3. View All Transactions
+
+4. View Income History
+
+5. View Expense History
+
+6. Search Transaction
+
+7. Update Transaction
+
+8. Delete Transaction
+
+9. View Current Balance
+
+10. Expense Statistics
+
+11. Back
+
+
+
+==================================================
+
+
+================ HEALTH MANAGER MENU ================
+
+
+1. Add Health Record
+
+2. View Health History
+
+3. View Recent Symptoms
+
+4. Search Health Record
+
+5. Update Health Record
+
+6. Mark Health Issue Resolved
+
+7. Ask AI Health Assistant
+
+8. Health Statistics
+
+9. Back
+
+
+
+==================================================
+
+
+================ ACHIEVEMENT SYSTEM MENU ================
+
+
+1. View All Achievements
+
+2. View Recent Achievements
+
+3. View Badge Collection
+
+4. View Achievement Progress
+
+5. Back
+
+
+
+==================================================
+
+
+================ STATISTICS / REPORTS MENU ================
+
+
+1. Overall Personal Report
+
+2. Task Statistics
+
+3. Goal Statistics
+
+4. Expense Report
+
+5. Health Report
+
+6. Achievement Report
+
+7. Monthly Report
+
+8. Yearly Report
+
+9. Back
+
+
+
+==================================================
+
+
+================ PROFILE MANAGEMENT MENU ================
+
+
+1. View Profile
+
+2. Update Profile Information
+
+3. Change Password
+
+4. Delete Account
+
+5. Back
+
+
+
+==================================================
+
+
+================ ADMIN MENU ================
+
+
+Admin Login
+
+|
+
+Admin Dashboard
+
+
+1. User Management
+
+2. System Statistics
+
+3. System Reports
+
+4. Search Users
+
+5. View User Activity
+
+6. Logout
+
+
+
+==================================================
+
+
+================ ADMIN USER MANAGEMENT MENU ================
+
+
+1. View All Users
+
+2. Search User By ID
+
+3. Search User By Name
+
+4. View User Details
+
+5. Remove User
+
+6. Back
+
+
+
+==================================================
+
+
+================ ADMIN STATISTICS MENU ================
+
+
+1. Total Registered Users
+
+2. Active Users
+
+3. Total Tasks Created
+
+4. Total Goals Created
+
+5. Total Transactions Recorded
+
+6. Total Achievements Unlocked
+
+7. System Activity Report
+
+8. Usage Trends
+
+9. Back
+
+
+
+==================================================
+
+
+================ AUTOMATIC DATA SAVING SYSTEM ================
+
+
+Users do not manually save data.
+
+The system automatically saves data using FileManager.
+
+
+Working:
+
+
+User performs an operation
+
+|
+
+↓
+
+Manager updates data
+
+|
+
+↓
+
+FileManager automatically saves changes
+
+|
+
+↓
+
+Data stored permanently
+
+
+
+Examples:
+
+
+Add Task
+
+↓
+
+TaskManager updates task list
+
+↓
+
+FileManager saves tasks
+
+
+
+Add Goal
+
+↓
+
+GoalManager updates goal list
+
+↓
+
+FileManager saves goals
+
+
+
+Add Expense
+
+↓
+
+ExpenseManager updates transactions
+
+↓
+
+FileManager saves transactions
+
+
+
+Add Health Record
+
+↓
+
+HealthManager updates health records
+
+↓
+
+FileManager saves health data
+
+
+
+Logout / Application Close:
+
+
+|
+
+↓
+
+System automatically saves all user data
+
+|
+
+↓
+
+User session ends
+
+
+
+==================================================
+
+
+================ FINAL MODULE STRUCTURE ================
+
+
+                         User
+
+                           |
+
+        ------------------------------------------------
+
+        |              |              |              |
+
+ TaskManager    GoalManager   ExpenseManager   HealthManager
+
+                                                     |
+
+                                                     |
+
+                                             AI Health Assistant
+
+
+        |
+
+ AchievementManager
+
+
+        |
+
+ Statistics
+
+
+        |
+
+ FileManager
+
+
+
+==================================================
+
+
+================ DESIGN REASONING ================
+
+
+- Each module has its own responsibility.
+- Managers handle data storage and operations.
+- Statistics only analyzes data and generates reports.
+- AI Assistant is integrated only inside Health Manager for symptom analysis.
+- FileManager automatically handles saving and loading.
+- Users can only access their own personal data.
+- Admin can view system-level statistics but cannot access private user information.
+
+This keeps the system modular, secure, and scalable.

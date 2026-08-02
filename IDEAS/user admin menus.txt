@@ -1,0 +1,29 @@
+MAIN MENU
+|
+|-- 1. Register User
+|
+|-- 2. User Login
+|
+|-- 3. Admin Login
+|
+|-- 4. Exit
+
+USER MENU
+|
+|-- 1. View My Details
+|
+|-- 2. Update My Details
+|
+|-- 3. Logout
+
+ADMIN MENU
+|
+|-- 1. View Admin Details
+|
+|-- 2. Display All Users
+|
+|-- 3. Search User
+|
+|-- 4. Remove User
+|
+|-- 5. Logout

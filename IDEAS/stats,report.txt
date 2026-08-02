@@ -1,0 +1,401 @@
+================ STATISTICS / REPORT SYSTEM WORKING ================
+
+
+USER SIDE:
+
+
+User Login
+
+|
+
+Dashboard
+
+|
+
+User selects a module
+
+|
+
+├── Task Manager
+|       |
+|       └── Display Task Statistics
+|
+├── Goal Manager
+|       |
+|       └── Display Goal Statistics
+|
+├── Expense Manager
+|       |
+|       └── Display Financial Statistics
+|
+├── Health Manager
+|       |
+|       └── Display Health Statistics
+|
+└── Achievement System
+        |
+        └── Display Achievement Statistics
+
+
+
+Statistics Module
+
+|
+
+Reads data from respective managers
+
+|
+
+Analyzes data
+
+|
+
+Generates reports
+
+|
+
+Displays user-specific statistics
+
+
+
+====================================================================
+
+
+ADMIN SIDE:
+
+
+Admin Login
+
+|
+
+Admin Dashboard
+
+|
+
+System Statistics
+
+|
+
+Displays overall application data:
+
+
+├── Total Registered Users
+
+├── Active Users
+
+├── Total Tasks Created
+
+├── Total Goals Created
+
+├── Total Achievements Unlocked
+
+├── Total Transactions Recorded
+
+├── System Usage Trends
+
+└── User Activity Reports
+
+
+
+====================================================================
+
+
+
+================ STATISTICS CLASS ================
+
+
+The Statistics class is responsible for analyzing data from different modules and generating reports.
+
+It does not store original data.
+
+It only reads data from managers.
+
+
+
+Data:
+
+
+|
+
+└── Report data generated dynamically
+
+
+
+================ USER STATISTICS ================
+
+
+UserStatistics Class
+
+
+
+Attributes:
+
+
+User ID
+
+Total Tasks
+
+Completed Tasks
+
+Pending Tasks
+
+Total Goals
+
+Completed Goals
+
+Achievement Count
+
+Total Income
+
+Total Expenses
+
+Current Balance
+
+Health Records Count
+
+Monthly Progress
+
+
+
+Functions:
+
+
+generateTaskReport()
+
+generateGoalReport()
+
+generateExpenseReport()
+
+generateHealthReport()
+
+generateAchievementReport()
+
+displayStatistics()
+
+generateMonthlyReport()
+
+generateYearlyReport()
+
+
+
+================ ADMIN STATISTICS ================
+
+
+AdminStatistics Class
+
+
+
+Attributes:
+
+
+Total Users
+
+Active Users
+
+Total Tasks
+
+Total Goals
+
+Total Transactions
+
+Total Achievements
+
+System Activity Data
+
+
+
+Functions:
+
+
+generateUserReport()
+
+generateSystemReport()
+
+displaySystemStatistics()
+
+getUserCount()
+
+getSystemActivity()
+
+
+
+================ STATISTICS RELATIONSHIPS ================
+
+
+Statistics has an association relationship with all managers.
+
+
+It reads data from:
+
+
+TaskManager
+
+GoalManager
+
+ExpenseManager
+
+HealthManager
+
+AchievementManager
+
+
+
+Example:
+
+
+TaskManager
+
+        |
+
+        ↓
+
+Statistics
+
+        |
+
+        ↓
+
+Task Report
+
+
+
+====================================================================
+
+
+
+================ USER AND STATISTICS RELATIONSHIP ================
+
+
+The User has a composition relationship with Statistics because each user requires their own personal reports and analysis.
+
+
+Each User contains a Statistics object that analyzes the user's personal data.
+
+
+Example:
+
+
+User A
+
+|
+
+Statistics
+
+|
+
+Reads:
+
+- User A Tasks
+- User A Goals
+- User A Expenses
+- User A Health Records
+
+
+
+User B will have separate statistics based only on User B's data.
+
+
+
+====================================================================
+
+
+
+================ ADMIN AND STATISTICS RELATIONSHIP ================
+
+
+Admin has access to AdminStatistics.
+
+AdminStatistics provides system-level reports.
+
+It does not access private user details such as:
+
+- Personal health records
+- Personal expenses
+- Personal goals
+- Personal tasks
+
+
+It only accesses required system information.
+
+
+
+====================================================================
+
+
+
+================ FINAL ARCHITECTURE ================
+
+
+
+                         User
+
+                           |
+
+                    Statistics
+
+                           |
+
+        ---------------------------------
+
+        |              |                |
+
+ TaskManager    GoalManager    ExpenseManager
+
+        |
+
+ HealthManager
+
+        |
+
+ AchievementManager
+
+
+
+
+
+                         Admin
+
+                           |
+
+                  AdminStatistics
+
+                           |
+
+                  System Database
+
+
+
+====================================================================
+
+
+
+================ DESIGN REASONING ================
+
+
+Statistics does not store module data.
+
+Each manager is responsible for its own data.
+
+Statistics only collects, analyzes, and displays information.
+
+User statistics are private and generated from individual user modules.
+
+Admin statistics are system-level and used for monitoring application performance.
+
+This design maintains:
+
+- Data privacy
+- Separation of responsibilities
+- Modular architecture
+- Easy future expansion
+
+
+Future Extensions:
+
+- AI productivity analysis
+- Smart recommendations
+- Monthly productivity score
+- Spending predictions
+- Health trends
+- Goal completion predictions
+- Admin analytics dashboard

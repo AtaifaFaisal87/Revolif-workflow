@@ -1,0 +1,490 @@
+================================================================================
+REVOLIF — ARCHITECTURE & DATABASE-READINESS ANALYSIS
+Prepared as a pre-database-design review. No SQL or C++ included.
+================================================================================
+
+
+1. HIGH-LEVEL SUMMARY
+--------------------------------------------------------------------------------
+Revolif is a single-process, console-based, in-memory C++ application with
+four functional modules (Task Manager, Expense Manager, Goal Manager,
+Achievement/Admin Manager) orchestrated by one top-level System class. There
+is currently NO real persistence: every object lives only as long as the
+program runs. The only file I/O in the whole codebase is a one-way, on-demand
+text export (generateMonthlyReport). Before any database is designed, several
+structural issues in the current OOP model should be resolved, because they
+will otherwise get "baked in" to the schema.
+
+
+2. FULL CLASS INVENTORY
+--------------------------------------------------------------------------------
+Exceptions (all inherit std::exception):
+  - FileException
+  - NotFoundException
+  - UserException
+  - AuthException
+  - ValidationException
+
+Value / Utility classes (no persistence identity of their own):
+  - Date            (day, month, year + calendar math)
+  - Time             (hour, minute, meridiem)
+
+Domain entities (things with an identity/ID and real-world meaning):
+  - Task (abstract base)
+  - AcademicTask (derived)
+  - DailyTask (derived)
+  - Expense
+  - Goal
+  - Achievement
+  - Admin
+  - User
+
+Managers / Repositories (in-memory containers + business logic, no identity
+of their own):
+  - TaskManager
+  - ExpenseManager
+  - GoalManager
+
+Orchestration / Service classes (no persisted state of their own):
+  - Authentication
+  - System (application root — owns everything)
+
+Presentation helpers (pure formatting, not part of the domain model):
+  - printBorder / printEmptyLine / printField / printWrappedField /
+    displayRecord / wrapText / showLoadingStep (all free functions)
+
+
+3. INHERITANCE RELATIONSHIPS
+--------------------------------------------------------------------------------
+  Task  <|---  AcademicTask
+  Task  <|---  DailyTask
+
+  (std::exception) <|--- FileException, NotFoundException, UserException,
+                          AuthException, ValidationException
+
+Notably, AcademicTask and DailyTask do NOT differ in behavior — displayTask()
+is byte-for-byte identical in both subclasses. The only real difference is
+the fixed "category" string passed to the base constructor ("Academic" vs
+"Daily") and which static picker menu (getAcademicTitle vs getDailyTitle) is
+shown before construction. This is a classic "discriminator-only"
+subclassing case (see Section 8, item 1).
+
+No other inheritance exists anywhere in the codebase — Admin and User are
+unrelated types despite representing highly overlapping concepts (both have
+a username + password hash and both authenticate through Authentication).
+
+
+4. COMPOSITION / AGGREGATION RELATIONSHIPS
+--------------------------------------------------------------------------------
+Strong composition (owner allocates/destroys, child cannot outlive parent):
+
+  User        *-- 1  TaskManager      (embedded value member)
+  User        *-- 1  ExpenseManager   (embedded value member)
+  User        *-- 1  GoalManager      (embedded value member)
+  TaskManager *-- *  Task             (vector<Task*>, deleted in ~TaskManager)
+  ExpenseManager *-- * Expense        (vector<Expense*>, deleted in destructor)
+  GoalManager *-- *  Goal             (vector<Goal*>, deleted in destructor)
+  System      *-- 1  Admin            (embedded value member, singleton)
+  System      *-- *  User             (vector<User*>, deleted in ~System)
+  System      *-- *  Achievement      (vector<Achievement> by value — global,
+                                        NOT owned per-user)
+
+Weaker, reference-based relationships:
+
+  System      -- 1  Authentication    (Authentication holds references back
+                                        into System's users vector and admin
+                                        object — this is a tight bidirectional
+                                        coupling, not ownership)
+
+Association (by ID, not by ownership — important for DB design):
+
+  User "unlockedAchievementIDs" (vector<int>) --> Achievement
+      This is a hand-rolled MANY-TO-MANY relationship: many users can unlock
+      many achievements. It is currently just a list of raw ints with no
+      supporting object and no timestamp of when it was unlocked.
+
+  User "displayedAchievementID" (int) --> Achievement
+      A single, optional ("featured") achievement per user — effectively a
+      nullable one-to-one/foreign-key relationship.
+
+  ExpenseManager "categoryBudgets" (map<string,double>) --> conceptual
+  "Category" entity that does not exist as a real class anywhere. Category
+  names are free-text strings, duplicated as hardcoded switch/case menus in
+  three unrelated places (TaskManager's implicit Academic/Daily, GoalManager
+  ::selectCategory, ExpenseManager::selectCategory).
+
+
+5. EXISTING MANAGERS (service/repository layer today)
+--------------------------------------------------------------------------------
+  - TaskManager    : CRUD + search + sort/prioritize + recurrence engine for
+                      a single user's tasks.
+  - ExpenseManager  : CRUD + search + budget tracking/alerts + spending chart
+                      rendering for a single user's expenses.
+  - GoalManager     : CRUD + search + completion + badge/title milestone
+                      tracking for a single user's goals.
+  - Authentication  : Login/registration, username & email uniqueness
+                      checks, password verification/change (admin + user).
+  - System          : Top-level orchestrator — achievement unlocking,
+                      "Life Score" calculation, dashboards, admin operations,
+                      monthly report export, all console menus.
+
+Each manager currently mixes THREE responsibilities in one class:
+  (a) data storage (the vector itself),
+  (b) business rules (sorting, alerts, milestone math), and
+  (c) presentation (direct cout << formatting, including an ASCII bar chart
+      in ExpenseManager::displaySpendingChart).
+This matters directly for database design — see Section 8, item 1.
+
+
+6. EXISTING ENTITIES (candidate persisted "things")
+--------------------------------------------------------------------------------
+  - User        : account/profile + streak + gamification state
+  - Admin       : single hardcoded operator account (admin/admin123 default)
+  - Task (+ AcademicTask/DailyTask) : to-do item with deadline, priority,
+                  recurrence
+  - Expense     : a spend record
+  - Goal        : a longer-term objective with a deadline
+  - Achievement : a global, shared unlockable definition (default or custom)
+  - (implicit) Budget       : one (user, category) -> monthly limit pair,
+                  currently only a map inside ExpenseManager, not a class
+  - (implicit) Category     : free-text string reused across Task/Goal/
+                  Expense, never modeled as its own entity
+  - (implicit) Milestone/Title rule : hardcoded arrays
+                  {5,10,20,30,40,50} -> {"Goal Beginner", ...} duplicated in
+                  three separate GoalManager methods
+
+
+7. BUSINESS LOGIC INVENTORY
+--------------------------------------------------------------------------------
+  - TaskManager::displayPendingTasks   — sorts by priority weight, then by
+                                          nearest deadline
+  - TaskManager::processRecurringTasks — regenerates a completed recurring
+                                          task's deadline forward by
+                                          1/7/30-day steps until it's in the
+                                          future; OVERWRITES the old deadline
+                                          (no history kept)
+  - TaskManager::count*                — overdue / due-soon / pending /
+                                          completed counters, computed live
+  - ExpenseManager::checkBudgetAlert   — warns at >80% of a category budget,
+                                          alerts when a category budget is
+                                          exceeded
+  - ExpenseManager::getTopCategoryInfo — ad hoc aggregation (highest-spend
+                                          category), recomputed on every call
+  - ExpenseManager::displaySpendingChart — aggregation + rendering combined
+  - GoalManager::updateBadges / goalsUntilNextTitle / getNextTitleName —
+                                          milestone/title logic, with the
+                                          same {5,10,20,30,40,50} thresholds
+                                          and title strings duplicated three
+                                          times (DRY violation)
+  - Authentication::registerUser       — enforces unique username & unique
+                                          email across all users
+  - Authentication::verifyPassword     — compares simpleHash(input) against
+                                          stored hash (weak, non-cryptographic
+                                          hash function — see Section 8,
+                                          item 5)
+  - User::recordLogin                  — daily streak calculation using a
+                                          magic sentinel date (20000101) to
+                                          mean "never logged in"
+  - System::checkAchievements          — cross-entity rule: compares a
+                                          user's completed-goal count against
+                                          every Achievement.requiredGoals to
+                                          decide what unlocks
+  - System::calculateLifeScore         — weighted composite score
+                                          (40% task completion rate + 40%
+                                          goal completion rate + 20% base -
+                                          overdue penalties), always computed
+                                          live, never stored
+  - System::generateMonthlyReport      — the ONLY file write in the program;
+                                          exports a formatted snapshot to
+                                          "<username>_report.txt"
+
+
+8. CURRENT PERSISTENCE MECHANISM
+--------------------------------------------------------------------------------
+There is effectively NONE. Specifically:
+
+  - All state (users, tasks, goals, expenses, budgets, achievements, admin
+    credentials) lives only in memory, in vector<T*> / vector<T> members,
+    for the lifetime of a single run of main(). Closing the program destroys
+    everything (the destructors even explicitly `delete` every pointer).
+
+  - The single file-I/O operation, System::generateMonthlyReport, is a
+    write-only export of a formatted report. It is never read back into the
+    program, so it does not function as real persistence — it is a
+    "printout," not a data store. Each generation overwrites the same
+    filename, so no history is kept.
+
+  - Every entity's ID is produced by an in-memory static counter that resets
+    to 1 every time the program starts:
+        Task::nextTaskID, Expense::nextExpenseID, Goal::nextGoalID,
+        Achievement::nextAchievementID, User::next_id
+    None of these are safe to keep once a real database exists — IDs must
+    come from the database (auto-increment/serial/UUID), and these statics
+    should be removed once persistence is introduced (they will otherwise
+    collide with existing DB rows on every restart).
+
+
+9. DATA THAT SHOULD BE PERSISTED PERMANENTLY
+--------------------------------------------------------------------------------
+  - User accounts: name, username, email, DOB, password hash (+ salt, once
+    upgraded — see Section 8, item 5), registration date, active/inactive
+    flag, last login date, current & best login streak, earned title
+  - Admin/operator credentials (decide: merged into users, or separate —
+    see Section 8, item 6)
+  - Tasks: all fields (title, description, deadline date+time, category,
+    status, priority, recurrence flag + interval), scoped to a user
+  - Goals: all fields, scoped to a user
+  - Expenses: all fields, scoped to a user
+  - Category budgets: (user, category) -> monthly limit
+  - Achievements: global catalog (name, description, required goal count,
+    default/custom flag)
+  - User <-> Achievement unlock records (which user unlocked which
+    achievement, ideally with a timestamp — not currently tracked but should
+    be, once persisted)
+  - A user's currently displayed/"featured" achievement selection
+
+10. DATA THAT SHOULD REMAIN TEMPORARY / SESSION-ONLY
+--------------------------------------------------------------------------------
+  - The currently-logged-in session/menu state (which menu the user is in,
+    the "loading bar" progress, the TTS marker file, masked-password input
+    buffers)
+  - Transient search-result vectors returned by searchByTitle/
+    searchByCategory/etc. — these are query results, not stored data
+  - The computed "Life Score" and its label — these are DERIVED at read time
+    from tasks + goals and must NOT be stored as columns, or they will go
+    stale the moment a task/goal changes
+  - The generated monthly report file itself — it is a disposable, on-demand
+    export that can always be regenerated from persisted data; it only needs
+    a table if you specifically want historical snapshots kept over time
+    (optional — a product decision, not a technical requirement)
+
+
+11. CLASS -> DATABASE TABLE MAPPING (conceptual, no SQL)
+--------------------------------------------------------------------------------
+  Task, AcademicTask, DailyTask
+      -> ONE table: "tasks"
+         Rationale: the subclasses carry no extra fields and no divergent
+         behavior — only a fixed category value. Recommend a single table
+         with a task_type/category discriminator column rather than
+         table-per-subclass. Columns needed: id, user_id (FK), task_type,
+         title, description, deadline_date, deadline_time, status, priority,
+         is_recurring, recurrence_interval.
+
+  Expense
+      -> table: "expenses"
+         id, user_id (FK), title, amount, category, expense_date,
+         description.
+
+  ExpenseManager.categoryBudgets (map<string,double>)
+      -> NEW table: "budgets" (does not exist as a class today)
+         id, user_id (FK), category, monthly_limit — unique per
+         (user_id, category).
+
+  Goal
+      -> table: "goals"
+         id, user_id (FK), title, description, category, deadline, status.
+
+  Achievement
+      -> table: "achievements" (global catalog, not per-user)
+         id, name, description, required_goals, is_default.
+
+  User.unlockedAchievementIDs (vector<int>)
+      -> NEW join table: "user_achievements"
+         user_id (FK), achievement_id (FK), unlocked_at — composite key
+         (user_id, achievement_id).
+
+  User.displayedAchievementID
+      -> a single nullable FK column on "users":
+         displayed_achievement_id -> achievements.id
+
+  GoalManager.badges + the milestone arrays duplicated across
+  goalsUntilNextTitle/getNextTitleName/updateBadges
+      -> NEW lookup table: "milestones"
+         id, required_goals, title_name — single source of truth, replacing
+         all three hardcoded copies of {5,10,20,30,40,50}. Whether a user's
+         "current title" is stored (denormalized, as User.title is today) or
+         always recomputed from completed-goal count + this table is a
+         design decision to make explicitly (Section 12, item 8).
+
+  User
+      -> table: "users"
+         id, name, username (unique), email (unique), password_hash,
+         password_salt (new), dob, registration_date, is_active, last_login
+         (nullable — see item 13 below), current_streak, best_streak, title,
+         displayed_achievement_id (FK, nullable).
+
+  Admin
+      -> EITHER merged into "users" via a role column, OR kept as its own
+         "admins" table — a decision to make before schema design (see
+         Section 12, item 6), because today it is a single hardcoded
+         singleton, not a real multi-row entity.
+
+  Date, Time (value classes)
+      -> NOT separate tables. They map to native DATE / TIME / DATETIME
+         column types wherever they appear (deadline, dob, expense_date,
+         last_login, registration_date, etc).
+
+  TaskManager, ExpenseManager, GoalManager
+      -> NO tables. These are pure in-memory containers/services; at the
+         persistence layer they disappear entirely and become nothing more
+         than "WHERE user_id = ?" query scoping.
+
+  System, Authentication
+      -> NO tables. Pure orchestration/service classes with no state of
+         their own to persist.
+
+  FileException, NotFoundException, UserException, AuthException,
+  ValidationException
+      -> NO tables. Runtime-only control flow.
+
+  (Optional, product decision) generateMonthlyReport output
+      -> OPTIONAL table: "reports" (id, user_id, generated_at, snapshot
+         data) ONLY if historical report snapshots need to be kept; otherwise
+         reports remain a pure on-demand export computed from other tables.
+
+
+12. DESIGN IMPROVEMENTS TO MAKE BEFORE DATABASE DESIGN
+--------------------------------------------------------------------------------
+  1. Separate storage, business rules, and presentation. Every manager
+     class currently does all three (owns the vector, applies business
+     logic like sorting/budget alerts, AND prints directly with cout).
+     Before mapping to a DB-backed architecture, split each into a
+     Repository (data access), a Service (business rules), and a
+     Presenter/View (console or other UI output) so that swapping the
+     in-memory vector for a real database doesn't require rewriting
+     business logic or output formatting.
+
+  2. Replace raw owning pointers with an ID-based repository pattern.
+     vector<Task*>, vector<Expense*>, vector<Goal*>, vector<User*> are
+     manually new'd/deleted today. This ownership model doesn't map cleanly
+     onto DB rows with independent lifecycles (especially once more than one
+     session can touch the same data). Recommend loading/saving entities by
+     ID through repositories rather than keeping them as permanently-owned
+     in-memory pointers.
+
+  3. Remove the in-memory static ID counters. Task::nextTaskID,
+     Expense::nextExpenseID, Goal::nextGoalID, Achievement::nextAchievementID,
+     and User::next_id all reset to 1 on every program start. Once a
+     database exists, ID generation should be delegated to the database
+     (auto-increment/serial), and these statics should be deleted — this is
+     the single biggest blocker to a clean schema mapping if left as-is.
+
+  4. Double-check ID scoping in the UI. IDs are global per entity type (Task
+     #5 could belong to any user), which is exactly right for a DB foreign
+     key model — but some current prompts ("ENTER TASK ID") don't make it
+     obvious to the end user that IDs are global rather than per-user, worth
+     revisiting once persisted.
+
+  5. Upgrade password hashing before persisting credentials. simpleHash is a
+     custom, non-cryptographic DJB2-style hash — acceptable for a toy
+     in-memory demo, but not something that should become "the" permanent
+     credential store. Plan on a proper adaptive hash (bcrypt/argon2/PBKDF2)
+     with a per-user salt column, since the schema should include a salt
+     field.
+
+  6. Decide how Admin relates to User. Today Admin is a single hardcoded
+     singleton (default admin/admin123) that duplicates username +
+     password-hash fields already on User, and Authentication has to
+     special-case admin login separately from user login. Recommend
+     unifying into one "users" table with a role column (user/admin) rather
+     than two parallel, structurally-identical tables.
+
+  7. Formalize the achievement-unlock relationship. unlockedAchievementIDs
+     is a hand-rolled many-to-many relationship (vector<int> of IDs). This
+     is exactly what a join table is for — flagging it now so it isn't
+     designed as, say, a comma-separated string column by mistake.
+
+  8. Consolidate the milestone/title rules. The thresholds
+     {5,10,20,30,40,50} and their title names are hardcoded independently in
+     three GoalManager methods (goalsUntilNextTitle, getNextTitleName,
+     updateBadges). Before persisting "current title" data, unify these into
+     one source of truth (a milestones table or config), and decide whether
+     a user's title should be stored (denormalized, as User.title is today)
+     or always recomputed at read time from completed-goal count.
+
+  9. Model Category as a real entity, not a repeated string literal.
+     categoryBudgets is a map<string,double> keyed by free-text names, and
+     category selection is a hardcoded switch/case menu duplicated
+     separately for goals and expenses (with tasks using fixed
+     "Academic"/"Daily" values instead). Recommend a proper Category lookup
+     (possibly scoped per manager type — task/goal/expense) rather than
+     copy-pasted string literals, to avoid typos and support renaming later.
+
+  10. Decide the intended meaning of Task's "title" field. It's currently
+      chosen from a fixed dropdown-like list (Exam/Assignment/... or
+      Laundry/Cleaning/...) with an "Other" free-text escape hatch — decide
+      whether this should become a controlled-vocabulary lookup table or
+      stay free text, since the current implementation blends both.
+
+  11. Decide how recurrence should be modeled for history. Today,
+      processRecurringTasks mutates a completed recurring task's deadline
+      forward in place, destroying the old deadline with no history of past
+      occurrences. Before finalizing a schema, decide: should a recurring
+      task remain one row that gets its deadline advanced (current
+      behavior), or should each occurrence become its own row/history
+      entry? This materially changes the tasks table design.
+
+  12. Use a discriminator column, not table-per-subclass, for Task.
+      AcademicTask and DailyTask have zero divergent fields or behavior
+      beyond a fixed category string — a single "tasks" table with a
+      task_type column is almost certainly the right mapping rather than
+      splitting into separate tables per subclass.
+
+  13. Replace the "never logged in" magic date with a real nullable column.
+      User::recordLogin compares Date::getToday() against lastLogin using a
+      sentinel value (toComparable() == 20000101) to mean "never logged
+      in," instead of using an actual nullable field. This magic-value
+      pattern should not be carried into the database — use a nullable
+      last_login column instead.
+
+  14. Plan for indexed search once persisted. searchByTitle/searchByCategory/
+      searchByStatus/etc. currently do linear, case-insensitive substring
+      scans over in-memory vectors. Once backed by a database these become
+      simple indexed WHERE/LIKE queries — flag title/category/status columns
+      as candidates for indexing.
+
+  15. Decide the fate of monthly reports. generateMonthlyReport writes
+      directly to a flat file named "<username>_report.txt" with no history
+      (each run overwrites the same file). Decide whether generated reports
+      should become a persisted, timestamped table (report history) or stay
+      a purely on-demand, regenerate-from-DB export with no table of their
+      own.
+
+  16. Map domain exceptions to persistence-layer constraints deliberately.
+      NotFoundException, ValidationException, UserException, AuthException,
+      and FileException are currently thrown by hand inside each menu flow
+      and caught at the menu loop. Once a DB/service layer exists, decide
+      which of these should instead be raised in response to actual
+      database constraint violations (e.g., a UNIQUE constraint on
+      username/email should still surface as UserException, not a raw
+      database error bubbling up to the console).
+
+  17. Confirm derived/computed values are never stored. calculateLifeScore
+      and its label are (correctly) computed live today from task/goal
+      counts — this behavior should be preserved once persisted; these
+      values must NOT become columns, or they will silently go stale
+      whenever a task or goal changes elsewhere.
+
+  18. Note the existing denormalization of User.title as a precedent.
+      User.title is already a cached copy of GoalManager's badges.back()
+      (the manager computes it, the user stores a copy). This same
+      "denormalize for cheap reads, recompute on write" pattern should be
+      applied consistently (or deliberately avoided) once real persistence
+      exists, rather than mixing "always derive" (Life Score) and "cache a
+      copy" (title) approaches inconsistently.
+
+
+13. RECOMMENDED NEXT STEPS
+--------------------------------------------------------------------------------
+  1. Resolve the open design decisions in Section 12 (especially items 3, 6,
+     8, 11, and 12 — they materially change table shapes).
+  2. Only after those decisions are made, produce the actual normalized
+     schema (tables, keys, constraints) — a follow-up deliverable, not part
+     of this analysis.
+  3. Introduce a Repository/Service/Presentation split in the C++ code so
+     that swapping the in-memory vectors for real database calls is a
+     localized change rather than a rewrite of every manager class.
+
+================================================================================
+END OF ANALYSIS
+================================================================================

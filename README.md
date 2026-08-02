@@ -11,8 +11,8 @@ The final production code is maintained separately.
 
 ## 👥 Team
 
-Ataifa Faisal @AtaifaFaisal87
-Yazdaan Ali Mirza @Yazdaan-Ali2006
+***Ataifa Faisal @AtaifaFaisal87 ***
+***Yazdaan Ali Mirza @Yazdaan-Ali2006 ***
 
 Together, we are building REVOLIF — a system designed to keep life beautifully aligned through thoughtful design, innovation, and collaboration.
 

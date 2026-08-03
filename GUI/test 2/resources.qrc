@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/assets/icons">
+        <file alias="dashboard.svg">assets/icons/dashboard.svg</file>
+        <file alias="tasks.svg">assets/icons/tasks.svg</file>
+        <file alias="goals.svg">assets/icons/goals.svg</file>
+        <file alias="focus.svg">assets/icons/focus.svg</file>
+        <file alias="finance.svg">assets/icons/finance.svg</file>
+        <file alias="calendar.svg">assets/icons/calendar.svg</file>
+        <file alias="settings.svg">assets/icons/settings.svg</file>
+        <file alias="bell.svg">assets/icons/bell.svg</file>
+        <file alias="search.svg">assets/icons/search.svg</file>
+        <file alias="plus.svg">assets/icons/plus.svg</file>
+        <file alias="check.svg">assets/icons/check.svg</file>
+        <file alias="trash.svg">assets/icons/trash.svg</file>
+        <file alias="play.svg">assets/icons/play.svg</file>
+        <file alias="pause.svg">assets/icons/pause.svg</file>
+    </qresource>
+</RCC>

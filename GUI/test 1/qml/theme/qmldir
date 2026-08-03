@@ -1,0 +1,7 @@
+module REVOLIF.Theme
+singleton Theme 1.0 Theme.qml
+singleton Colors 1.0 Colors.qml
+singleton Typography 1.0 Typography.qml
+singleton Spacing 1.0 Spacing.qml
+singleton Animations 1.0 Animations.qml
+singleton Icons 1.0 Icons.qml

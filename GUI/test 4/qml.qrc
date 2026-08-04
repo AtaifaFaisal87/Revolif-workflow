@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/AuthScreen.qml</file>
+        <file>qml/MainShell.qml</file>
+        <file>qml/Theme.qml</file>
+        <file>qml/qmldir</file>
+        <file>qml/components/Sidebar.qml</file>
+        <file>qml/components/TopBar.qml</file>
+        <file>qml/components/Card.qml</file>
+        <file>qml/components/AnimatedButton.qml</file>
+        <file>qml/components/Toast.qml</file>
+        <file>qml/components/ProgressRing.qml</file>
+        <file>qml/components/WaveBackground.qml</file>
+        <file>qml/components/MiniCalendar.qml</file>
+        <file>qml/components/ConfirmDialog.qml</file>
+        <file>qml/pages/DashboardPage.qml</file>
+        <file>qml/pages/TasksPage.qml</file>
+        <file>qml/pages/GoalsPage.qml</file>
+        <file>qml/pages/ExpensesPage.qml</file>
+        <file>qml/pages/ProfilePage.qml</file>
+        <file>qml/pages/SettingsPage.qml</file>
+        <file>qml/pages/AdminPage.qml</file>
+        <file>qml/pages/AchievementsPage.qml</file>
+        <file>qml/dialogs/AddTaskDialog.qml</file>
+        <file>qml/dialogs/AddGoalDialog.qml</file>
+        <file>qml/dialogs/AddExpenseDialog.qml</file>
+        <file>qml/dialogs/AddAchievementDialog.qml</file>
+        <file>assets/logo.jpeg</file>
+    </qresource>
+</RCC>
